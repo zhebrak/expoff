@@ -31,18 +31,17 @@ def exponential_fuckoff(*dargs, **dkwargs):
 
 
 class RecursiveMethod:
-    def __init__(self, obj, func):
+    def __init__(self, func):
         self.func = func
-        self.obj = obj
 
     def __call__(self, *args, **kwargs):
-        result = self.func(self.obj, *args, **kwargs)
+        result = self.func(*args, **kwargs)
         while callable(result):
             result = result()
         return result
 
     def call(self, *args, **kwargs):
-        return lambda: self.func(self.obj, *args, **kwargs)
+        return lambda: self.func(*args, **kwargs)
 
 
 class Retry:
@@ -53,7 +52,7 @@ class Retry:
         for attr, value in kwargs.items():
             setattr(self, attr, value)
 
-        self.run = RecursiveMethod(self, self.run)
+        self.run = RecursiveMethod(self.run)
 
     def run(self, *args, **kwargs):
         try:
