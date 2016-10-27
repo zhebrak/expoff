@@ -20,7 +20,7 @@ def exponential_fuckoff(*dargs, **dkwargs):
         @six.wraps(func)
         def wrapped(*args, **kwargs):
             retry = Retry(func, **retry_kwargs)
-            return retry.run()
+            return retry.run(*args, **kwargs)
 
         return wrapped
 
@@ -30,19 +30,26 @@ def exponential_fuckoff(*dargs, **dkwargs):
     return decorator
 
 
-class RecursiveMethod:
-    def __init__(self, obj, func):
+class WrapCallable:
+    def __init__(self, func):
         self.func = func
-        self.obj = obj
 
     def __call__(self, *args, **kwargs):
-        result = self.func(self.obj, *args, **kwargs)
-        while callable(result):
+        return self.func(*args, **kwargs)
+
+
+class RecursiveMethod:
+    def __init__(self, func):
+        self.func = func
+
+    def __call__(self, *args, **kwargs):
+        result = self.func(*args, **kwargs)
+        while isinstance(result, WrapCallable):
             result = result()
         return result
 
     def call(self, *args, **kwargs):
-        return lambda: self.func(self.obj, *args, **kwargs)
+        return WrapCallable(lambda: self.func(*args, **kwargs))
 
 
 class Retry:
@@ -53,7 +60,7 @@ class Retry:
         for attr, value in kwargs.items():
             setattr(self, attr, value)
 
-        self.run = RecursiveMethod(self, self.run)
+        self.run = RecursiveMethod(self.run)
 
     def run(self, *args, **kwargs):
         try:
