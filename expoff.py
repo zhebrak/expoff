@@ -20,7 +20,7 @@ def exponential_fuckoff(*dargs, **dkwargs):
         @six.wraps(func)
         def wrapped(*args, **kwargs):
             retry = Retry(func, **retry_kwargs)
-            return retry.run()
+            return retry.run(*args, **kwargs)
 
         return wrapped
 
