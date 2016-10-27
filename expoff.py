@@ -30,18 +30,26 @@ def exponential_fuckoff(*dargs, **dkwargs):
     return decorator
 
 
+class WrapCallable:
+    def __init__(self, func):
+        self.func = func
+
+    def __call__(self, *args, **kwargs):
+        return self.func(*args, **kwargs)
+
+
 class RecursiveMethod:
     def __init__(self, func):
         self.func = func
 
     def __call__(self, *args, **kwargs):
         result = self.func(*args, **kwargs)
-        while callable(result):
+        while isinstance(result, WrapCallable):
             result = result()
         return result
 
     def call(self, *args, **kwargs):
-        return lambda: self.func(*args, **kwargs)
+        return WrapCallable(lambda: self.func(*args, **kwargs))
 
 
 class Retry:
