@@ -13,7 +13,7 @@ def get_infinity():
 get_infinity()
 ```
 
-> each call is made 2x sooner then previous!
+> each call is made 2x sooner than previous!
 
 ```code
 Repeating get_infinity #1
